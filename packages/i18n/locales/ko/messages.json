@@ -1,11 +1,11 @@
 {
   "extensionDescription": {
-    "description": "Extension description",
-    "message": "React, Typescript, Vite를 사용한 크롬 익스텐션 보일러플레이트입니다."
+    "description": "여기가 어딘지 쉽게 찾자",
+    "message": "페이지에서 주소를 자동으로 탐지하여 네이버 지도 링크로 변환해줍니다."
   },
   "extensionName": {
-    "description": "Extension name",
-    "message": "크롬 익스텐션 보일러플레이트"
+    "description": "whereisthis",
+    "message": "여기가 어디야?"
   },
   "toggleTheme": {
     "message": "테마 변경"

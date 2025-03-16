@@ -30,7 +30,7 @@ const manifest = {
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
   host_permissions: ['<all_urls>'],
-  permissions: ['storage', 'scripting', 'tabs', 'notifications', 'sidePanel'],
+  permissions: ['storage', 'scripting', 'tabs', 'notifications', 'sidePanel', 'activeTab'],
   options_page: 'options/index.html',
   background: {
     service_worker: 'background.js',
@@ -57,6 +57,10 @@ const manifest = {
     },
     {
       matches: ['http://*/*', 'https://*/*', '<all_urls>'],
+      js: ['content-runtime/index.iife.js'],
+    },
+    {
+      matches: ['http://*/*', 'https://*/*', '<all_urls>'],
       css: ['content.css'],
     },
   ],
@@ -69,6 +73,12 @@ const manifest = {
   ],
   side_panel: {
     default_path: 'side-panel/index.html',
+  },
+  /**
+   * 크롬 확장 프로그램은 CSP(Content Security Policy) 때문에 특정 API 호출이 차단될 수 있습니다. 예를 들어, document.addEventListener('selectionchange')가 특정 웹사이트에서 제한될 수도 있습니다.
+   */
+  content_security_policy: {
+    extension_pages: "script-src 'self'; object-src 'self'",
   },
 } satisfies chrome.runtime.ManifestV3;
 
