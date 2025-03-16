@@ -42,9 +42,12 @@ function detectAndLinkAddresses(): void {
     // 텍스트 노드인 경우 처리
     if (node.nodeType === Node.TEXT_NODE) {
       const text = node.textContent;
-      if (text && text.trim().length > 0 && validateAddress(text.trim())) {
-        replaceWithLink(node as Text, text);
-        processedNodes.add(node);
+      if (text && text.trim().length > 0) {
+        const result = validateAddress(text.trim());
+        if (result.valid && result.matched) {
+          replaceWithAddressLink(node as Text, text, result.matched);
+          processedNodes.add(node);
+        }
       }
       return;
     }
@@ -87,15 +90,60 @@ function detectAndLinkAddresses(): void {
     });
   }
 
-  // 텍스트 노드를 링크로 교체
-  function replaceWithLink(textNode: Text, text: string): void {
-    // 주소 부분만 추출하여 링크 변환
-    const trimmedText = text.trim();
-    const encodedAddress = encodeURIComponent(trimmedText);
+  /**
+   * 텍스트 노드에서 주소 부분만 링크로 변환하는 함수
+   * @param textNode 원본 텍스트 노드
+   * @param originalText 원본 텍스트
+   * @param addressText 주소 텍스트
+   */
+  function replaceWithAddressLink(textNode: Text, originalText: string, addressText: string): void {
+    // 매칭된 주소가 전체 텍스트와 동일한 경우
+    if (originalText.trim() === addressText) {
+      const link = createAddressLink(addressText);
+      textNode.parentNode?.replaceChild(link, textNode);
+      return;
+    }
+
+    // 매칭된 주소가 전체 텍스트의 일부인 경우, 텍스트를 분할하여 처리
+    const parentNode = textNode.parentNode;
+    if (!parentNode) return;
+
+    // 전체 텍스트에서 매칭된 주소의 위치 찾기
+    const addressIndex = originalText.indexOf(addressText);
+    if (addressIndex === -1) return; // 예상치 못한 오류 방지
+
+    // 주소 앞 텍스트
+    if (addressIndex > 0) {
+      const beforeText = originalText.substring(0, addressIndex);
+      parentNode.insertBefore(document.createTextNode(beforeText), textNode);
+    }
+
+    // 주소 부분 링크로 변환
+    const link = createAddressLink(addressText);
+    parentNode.insertBefore(link, textNode);
+
+    // 주소 뒤 텍스트
+    const afterIndex = addressIndex + addressText.length;
+    if (afterIndex < originalText.length) {
+      const afterText = originalText.substring(afterIndex);
+      parentNode.insertBefore(document.createTextNode(afterText), textNode);
+    }
+
+    // 원본 텍스트 노드 제거
+    parentNode.removeChild(textNode);
+  }
+
+  /**
+   * 주소 텍스트를 기반으로 네이버 지도 링크 생성
+   * @param addressText 주소 텍스트
+   * @returns HTMLAnchorElement
+   */
+  function createAddressLink(addressText: string): HTMLAnchorElement {
+    const encodedAddress = encodeURIComponent(addressText);
 
     const link = document.createElement('a');
     link.href = `https://map.naver.com/p/search/${encodedAddress}`;
-    link.textContent = trimmedText;
+    link.textContent = addressText;
     link.target = '_blank';
     link.title = '네이버 지도에서 보기';
     link.className = 'whereisthis-address-link';
@@ -103,10 +151,7 @@ function detectAndLinkAddresses(): void {
     link.style.textDecoration = 'underline';
     link.style.cursor = 'pointer';
 
-    // 부모 노드가 있는 경우에만 교체
-    if (textNode.parentNode) {
-      textNode.parentNode.replaceChild(link, textNode);
-    }
+    return link;
   }
 
   try {
