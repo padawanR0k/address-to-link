@@ -49,6 +49,21 @@ function detectAndLinkAddresses(): void {
       return;
     }
 
+    // iframe 요소인 경우 내부 문서 처리 시도
+    if (node instanceof HTMLIFrameElement) {
+      try {
+        const iframeDocument = node.contentDocument || node.contentWindow?.document;
+        // 접근 가능한 iframe인 경우에만 처리 (same-origin policy)
+        if (iframeDocument && iframeDocument.body) {
+          processTextNodes(iframeDocument.body);
+        }
+      } catch (error) {
+        // 크로스 도메인 iframe 접근 시도 시 발생하는 보안 에러 무시
+        console.log('iframe 접근 제한됨 (cross-origin):', error);
+      }
+      return;
+    }
+
     // HTMLElement가 아닌 경우 건너뛰기
     if (!(node instanceof HTMLElement)) {
       return;
@@ -60,7 +75,6 @@ function detectAndLinkAddresses(): void {
       node.tagName === 'SCRIPT' ||
       node.tagName === 'STYLE' ||
       node.tagName === 'HEAD' ||
-      node.tagName === 'IFRAME' ||
       node.id === 'chrome-extension-boilerplate-react-vite-runtime-content-view-root' ||
       node.closest('#whereisthis-root')
     ) {
@@ -98,7 +112,6 @@ function detectAndLinkAddresses(): void {
   try {
     // 페이지 내 모든 노드 처리 시작
     if (document.body) {
-      console.log('페이지 내 모든 노드 처리 시작 ');
       processTextNodes(document.body);
 
       // 동적으로 추가되는 콘텐츠를 위한 MutationObserver 설정
@@ -148,12 +161,13 @@ export function mount() {
 
   // 페이지 로드 후 활성화 상태라면 주소 감지 시작 (타이머 시간 줄임)
   if (isAddressLinkEnabled) {
-    setTimeout(() => detectAndLinkAddresses(), 300);
+    setTimeout(() => detectAndLinkAddresses(), WAITING_TIME);
   }
 }
 
 // 페이지 로드 시 자동으로 mount 함수 실행
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('???');
   mount();
 });
+
+const WAITING_TIME = 300;

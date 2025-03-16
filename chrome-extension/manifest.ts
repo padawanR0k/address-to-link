@@ -6,16 +6,6 @@ const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
  * @prop default_locale
  * if you want to support multiple languages, you can use the following reference
  * https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Internationalization
- *
- * @prop browser_specific_settings
- * Must be unique to your extension to upload to addons.mozilla.org
- * (you can delete if you only want a chrome extension)
- *
- * @prop permissions
- * Firefox doesn't support sidePanel (It will be deleted in manifest parser)
- *
- * @prop content_scripts
- * css: ['content.css'], // public folder
  */
 const manifest = {
   manifest_version: 3,
@@ -30,18 +20,13 @@ const manifest = {
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
   host_permissions: ['<all_urls>'],
-  permissions: ['storage', 'scripting', 'tabs', 'notifications', 'sidePanel', 'activeTab'],
-  options_page: 'options/index.html',
+  permissions: ['storage', 'activeTab', 'scripting'], // 필수 권한만 남김
   background: {
     service_worker: 'background.js',
     type: 'module',
   },
   action: {
-    default_popup: 'popup/index.html',
     default_icon: 'icon-34.png',
-  },
-  chrome_url_overrides: {
-    newtab: 'new-tab/index.html',
   },
   icons: {
     128: 'icon-128.png',
@@ -49,34 +34,19 @@ const manifest = {
   content_scripts: [
     {
       matches: ['http://*/*', 'https://*/*', '<all_urls>'],
-      js: ['content/index.iife.js'],
-    },
-    {
-      matches: ['http://*/*', 'https://*/*', '<all_urls>'],
-      js: ['content-ui/index.iife.js'],
-    },
-    {
-      matches: ['http://*/*', 'https://*/*', '<all_urls>'],
-      js: ['content-runtime/index.iife.js'],
+      js: ['content-runtime/index.iife.js'], // 핵심 기능 스크립트만 유지
     },
     {
       matches: ['http://*/*', 'https://*/*', '<all_urls>'],
       css: ['content.css'],
     },
   ],
-  devtools_page: 'devtools/index.html',
   web_accessible_resources: [
     {
-      resources: ['*.js', '*.css', '*.svg', 'icon-128.png', 'icon-34.png'],
+      resources: ['*.js', '*.css', 'icon-128.png', 'icon-34.png'],
       matches: ['*://*/*'],
     },
   ],
-  side_panel: {
-    default_path: 'side-panel/index.html',
-  },
-  /**
-   * 크롬 확장 프로그램은 CSP(Content Security Policy) 때문에 특정 API 호출이 차단될 수 있습니다. 예를 들어, document.addEventListener('selectionchange')가 특정 웹사이트에서 제한될 수도 있습니다.
-   */
   content_security_policy: {
     extension_pages: "script-src 'self'; object-src 'self'",
   },
