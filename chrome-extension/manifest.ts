@@ -9,27 +9,24 @@ const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
  */
 const manifest = {
   manifest_version: 3,
-  default_locale: 'en',
-  name: '__MSG_extensionName__',
-  browser_specific_settings: {
-    gecko: {
-      id: 'example@example.com',
-      strict_min_version: '109.0',
-    },
-  },
+  default_locale: 'ko',
+  name: 'address to link - 주소에 지도 링크 자동추가',
   version: packageJson.version,
-  description: '__MSG_extensionDescription__',
+  description: '접근한 페이지에서 주소로 인식되는 텍스트에 지도 링크를 추가합니다',
   host_permissions: ['<all_urls>'],
   permissions: ['storage', 'activeTab', 'scripting'], // 필수 권한만 남김
-  background: {
-    service_worker: 'background.js',
-    type: 'module',
-  },
   action: {
-    default_icon: 'icon-34.png',
+    default_icon: {
+      '16': 'favicon-16x16.png',
+      '32': 'favicon-32x32.png',
+    },
+    default_title: 'Address to Link',
   },
   icons: {
-    128: 'icon-128.png',
+    '16': 'favicon-16x16.png',
+    '32': 'favicon-32x32.png',
+    '192': 'android-chrome-192x192.png',
+    '512': 'android-chrome-512x512.png',
   },
   content_scripts: [
     {
@@ -43,7 +40,7 @@ const manifest = {
   ],
   web_accessible_resources: [
     {
-      resources: ['*.js', '*.css', 'icon-128.png', 'icon-34.png'],
+      resources: ['*.js', '*.css', 'icon-*.png', 'android-chrome-*.png', 'favicon*.*'],
       matches: ['*://*/*'],
     },
   ],
