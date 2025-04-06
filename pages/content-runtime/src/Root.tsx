@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import { validateAddress } from './utils/addressValidator';
 
 // 확장 프로그램 활성화 상태
-let isAddressLinkEnabled = false;
+let isAddressLinkEnabled = true;
 
 // 메시지 리스너 설정
 chrome.runtime.onMessage.addListener((message: { action: string; enabled: boolean }) => {

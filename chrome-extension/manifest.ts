@@ -14,7 +14,7 @@ const manifest = {
   version: packageJson.version,
   description: '접근한 페이지에서 주소로 인식되는 텍스트에 지도 링크를 추가합니다',
   host_permissions: ['<all_urls>'],
-  permissions: ['storage', 'activeTab', 'scripting'], // 필수 권한만 남김
+  permissions: ['activeTab', 'scripting'], // 필수 권한만 남김
   action: {
     default_icon: {
       '16': 'favicon-16x16.png',
